@@ -1,0 +1,489 @@
+/* General Styles */
+body {
+  font-family: 'Roboto Slab', serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to right, #e0f2f7, #f0e6ef);
+  color: #2c3e50;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #6a11cb;
+}
+
+.logo img {
+  width: 200px;
+  height: auto;
+  margin-right: 10px;
+}
+
+/* Navbar container background */
+.navcolor {
+  background-color: #e6f4ea;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Brand logo text */
+.navbar-brand {
+  font-weight: bold;
+  font-size: 24px;
+  color: #84d42e ; /* Light green */
+  font-family: 'Roboto Slab', serif;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Nav link default style */
+.navbar-nav .nav-link {
+  color: #84d42e  !important;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+/* Nav link hover effect */
+.navbar-nav .nav-link:hover {
+  background-color: rgba(50, 205, 50, 0.1); /* Light green hover */
+  color: #7fd523 !important; /* Slightly darker green on hover */
+}
+
+/* Active nav link */
+.navbar-nav .nav-link.active {
+  background-color: rgba(50, 205, 50, 0.15);
+  border-radius: 8px;
+}
+
+/* Mobile menu toggle icon color */
+.navbar-toggler {
+  border-color: #b1f16d ;
+}
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(50, 205, 50, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Dashboard Styling */
+.dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.dashboard-content {
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h1, h2 {
+  color: #6a11cb;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn-option {
+  width: 100%;
+  margin: 10px 0;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #6a11cb;
+  color: white;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.btn-option:hover {
+  background-color: #d3f589;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-content {
+      width: 100%;
+      padding: 30px;
+  }
+
+  .logo {
+      font-size: 1.8rem;
+  }
+
+  .btn-option {
+      font-size: 16px;
+      padding: 12px;
+  }
+}
+
+/* Specific styles from previous inline blocks that are not overwritten */
+
+/* Hero Section (from index.html) */
+.hero {
+position: relative;
+width: 100%;
+height: 500px;
+background: url('backgroundcow.png') no-repeat center center/cover;
+display: flex;
+align-items: center;
+justify-content: center;
+font-family: 'Roboto Slab', serif;
+}
+
+.hero-overlay {
+background-color: rgba(36, 38, 36, 0.405);
+width: 100%; /* matching about-section overlay */
+backdrop-filter: blur(4px); /* blur like about-section */
+padding: 40px;
+border-radius: 15px;
+box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* consistent shadow */
+text-align: center;
+color: #f1f8e9; /* soft white text like about-section */
+max-width: 80%;
+height:400px;
+}
+
+.hero-overlay h1,
+.hero-overlay h3 {
+font-weight: bold;
+color:  #98d953; /* light green heading */
+}
+
+.hero-overlay h1 {
+font-size: 48px;
+margin-bottom: 15px;
+}
+
+.hero-overlay h3 {
+font-size: 26px;
+margin-bottom: 10px;
+}
+
+.hero-overlay p {
+font-size: 18px;
+line-height: 1.6;
+color: #fdfdfd; /* soft off-white */
+margin-bottom: 20px;
+}
+
+.hero-overlay .btn {
+font-size: 16px;
+padding: 10px 25px;
+border-radius: 30px;
+background: #87cd3c; /* deep green button */
+color: white;
+font-weight: 600;
+border: none;
+transition: background-color 0.3s ease;
+}
+
+.hero-overlay .btn:hover {
+background: #87cd3c; /* lighter green on hover */
+color: #fff;
+}
+
+/* Feature Section (from index.html) */
+.feature-section {
+background-color: #e6f4ea; /* light green background */
+padding: 50px 0; /* Added padding for better spacing */
+}
+
+.feature-card {
+background-color:#87cd3c; /* deep green */
+color: white;
+border: none;
+border-radius: 15px;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+margin-bottom: 20px; /* Added margin between cards */
+}
+
+.feature-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.btn-green {
+background-color: #1b5e20;
+color: white;
+border: none;
+padding: 10px 20px;
+font-weight: 600;
+border-radius: 25px;
+transition: background-color 0.3s ease;
+text-decoration: none; /* To ensure the <a> tag looks like a button */
+display: inline-block; /* To control padding and margin */
+}
+
+.btn-green:hover {
+background-color: #3b923f;
+color: #fff;
+}
+
+.card-title {
+font-size: 1.5rem;
+font-weight: bold;
+margin-bottom: 1rem;
+}
+
+.card-text {
+font-size: 1rem;
+margin-bottom: 1rem;
+}
+
+/* About Section (from index.html) */
+.about-section {
+position: relative;
+background: url('twocow.webp') no-repeat center center/cover;
+padding: 60px 0;
+border-radius: 10px;
+color: #f1f8e9; /* Default text color for overlayed content */
+}
+
+.about-overlay {
+background-color: rgba(0, 0, 0, 0.5); /* black overlay with transparency */
+backdrop-filter: blur(4px); /* blurred effect */
+width: 100%;
+height: 100%;
+position: absolute;
+top: 0;
+left: 0;
+padding: 60px 20px; /* Ensure padding inside overlay */
+box-sizing: border-box; /* Include padding in width and height */
+}
+
+.about-text {
+max-width: 600px;
+margin: 0 auto; /* Center text in overlay */
+}
+
+.about-text h2 {
+font-size: 2.5rem;
+font-weight: bold;
+color: #a5d6a7; /* Light green */
+margin-bottom: 20px;
+}
+
+.about-text p {
+font-size: 1.1rem;
+line-height: 1.7;
+margin-bottom: 15px;
+}
+
+.about-img {
+text-align: center; /* Center image if it's separate */
+margin-top: 30px;
+}
+
+.about-img img {
+max-width: 100%; /* Make image responsive within its container */
+height: auto;
+border-radius: 15px;
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 768px) {
+  .about-section .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+  }
+  .about-text {
+      margin-right: 30px;
+  }
+  .about-img {
+      margin-top: 0;
+  }
+}
+
+/* Solution Section (from index.html) */
+.solution-section {
+background-color:  #e6f4ea;
+padding: 60px 20px;
+border-radius: 10px;
+}
+
+.solution-title {
+font-size: 2.5rem;
+font-weight: bold;
+color:#87cd3c;
+margin-bottom: 30px;
+text-align: center;
+}
+
+.solution-card {
+background-color: #87cd3c;
+color:  #e6f4ea;
+border-radius: 15px;
+border: none;
+padding: 30px 20px;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+margin-bottom: 20px; /* Added margin between cards */
+}
+
+.solution-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.solution-card .card-title {
+font-size: 1.5rem;
+font-weight: 700;
+margin-bottom: 10px;
+}
+
+.solution-card .card-text {
+font-size: 1rem;
+line-height: 1.6;
+}
+
+.solution-icon {
+width: 50px;
+height: 50px;
+object-fit: contain;
+margin-bottom: 15px; /* Added margin for icon */
+}
+
+/* Footer (from index.html) */
+.footer {
+background-color:#90d745; /* deep green */
+color: #f1f8e9; /* soft off-white */
+border-top-left-radius: 20px;
+border-top-right-radius: 20px;
+box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+padding: 20px 0; /* Added padding for better spacing */
+text-align: center;
+}
+
+.footer-text {
+font-size: 1rem;
+font-weight: 500;
+letter-spacing: 0.5px;
+margin-bottom: 0; /* Removed default margin */
+}
+
+/* Styles for prediction result pages (breed.html and disease.html) */
+.prediction-container {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 15px 35px rgba(0 , 0, 0.15);
+}
+
+.prediction-container h2 {
+    font-size: 32px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #1b5e20; /* Default color, can be overridden */
+}
+
+.prediction-result {
+    background: #f1f8e9;
+    border-left: 6px solid #66bb6a; /* Default border color */
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    color: #33691e; /* Default text color */
+    margin-bottom: 30px;
+}
+
+.breed-analysis h3, .disease-analysis h3 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #33691e; /* Default color */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.breed-analysis p, .disease-analysis p {
+    font-size: 18px;
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+}
+
+.highlight {
+    font-weight: bold;
+    color: #1b5e20; /* Default color */
+}
+
+.breed-analysis h4, .disease-analysis h4 {
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.breed-analysis h4 {
+    color: #2e7d32;
+}
+
+.disease-analysis h4 {
+    color: #f44336;
+}
+
+.prediction-result.disease {
+    border-left-color: #f44336;
+    color: #d32f2f;
+}
+
+.prediction-container.disease h2 {
+    color: #d32f2f;
+}
+
+.disease-analysis h3 {
+    color: #d32f2f;
+}
+
+.highlight.disease {
+    color: #d32f2f;
+}
+
+.prediction-container ul {
+    list-style: none;
+    padding-left: 0;
+    text-align: center;
+}
+
+.prediction-container ul li {
+    font-size: 16px;
+    margin: 10px 0;
+    padding-left: 25px;
+    color: #455a64;
+    position: relative;
+}
+
+.prediction-container.breed-analysis ul li::before {
+    content: "✔";
+    color: #66bb6a;
+    position: absolute;
+    left: 0;
+    top: 2px;
+}
+
+.prediction-container.disease-analysis ul li::before {
+    content: "⚠️";
+    color: #f44336;
+    position: absolute;
+    left: 0;
+    top: 2px;
+}

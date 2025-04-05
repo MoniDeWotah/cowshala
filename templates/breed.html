@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Breed Classification Dashboard | COWशाला</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;600;800&display=swap" rel="stylesheet" />
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Roboto Slab', serif;
+            background: linear-gradient(to right, #e8f5e9, #a5d6a7);
+            margin: 0;
+            padding: 0;
+            color: #2e7d32;
+        }
+
+        /* Navbar Styles */
+        .navcolor {
+            background-color: #e6f4ea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 24px;
+            color: #84d42e;
+            font-family: 'Roboto Slab', serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand img {
+            width: 40px;
+            height: auto;
+        }
+
+        .navbar-nav .nav-link {
+            color: #84d42e !important;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(50, 205, 50, 0.1);
+            color: #7fd523 !important;
+        }
+
+        .navbar-nav .nav-link.active {
+            background-color: rgba(50, 205, 50, 0.15);
+            border-radius: 8px;
+        }
+
+        .navbar-toggler {
+            border-color: #b1f16d;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(50, 205, 50, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh; /* Reduced height to fit better */
+            padding: 20px;
+        }
+
+        .dashboard-content {
+            background: #ffffff;
+            width: 100%;
+            max-width: 550px;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        h1 {
+            color: #1b5e20;
+            font-weight: 800;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #c8e6c9;
+            border-radius: 8px;
+            background-color: #f1f8e9;
+            font-size: 15px;
+        }
+
+        button {
+            background-color: #2e7d32;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #1b5e20;
+        }
+
+        /* Prediction Display (Initially Hidden) */
+        #prediction-result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9fbe7;
+            border: 1px solid #dcedc8;
+            border-radius: 8px;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+
+        #prediction-result h2 {
+            font-size: 1.5rem;
+            color: #33691e;
+            margin-bottom: 10px;
+        }
+
+        #prediction-result p {
+            font-size: 1.1rem;
+            color: #2e7d32;
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-content {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navcolor">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="cowshaala.png" alt="Nandu Cowshala Logo">
+                COWशाला
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="disease_dashboard.html">Disease Predictor</a></li>
+                    <li class="nav-item"><a class="nav-link" href="breed_dashboard.html">Breed Detector</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-content">
+            <h1>Cow Breed Classification</h1>
+            <form action="/predict_breed" method="POST" enctype="multipart/form-data" id="breed-form">
+                <div class="form-group">
+                    <label for="image">Upload Image:</label>
+                    <input type="file" id="image" name="image" accept="image/*" required />
+                </div>
+                <button type="submit">Predict Breed</button>
+            </form>
+            <div id="prediction-result">
+                <h2>Prediction:</h2>
+                <p id="breed-prediction"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('breed-form');
+        const resultDiv = document.getElementById('prediction-result');
+        const predictionText = document.getElementById('breed-prediction');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/predict_breed', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    predictionText.textContent = data.breed;  // Assuming the breed is in data.breed
+                    resultDiv.style.display = 'block';       // Show the result
+                } else {
+                    alert('Error predicting breed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+
+</html>
