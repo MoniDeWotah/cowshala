@@ -1,0 +1,10 @@
+Flask
+numpy
+pandas
+joblib
+Werkzeug
+Pillow
+torch
+torchvision
+scikit-learn
+google-generativeai
