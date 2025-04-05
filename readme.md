@@ -14,10 +14,15 @@ Responsive Design: Templates and static files have been structured for an intuit
 
 ## Tech Stack
 Backend: Flask, Python
+
 Machine Learning: PyTorch (ResNet18), Scikit-learn (RandomForestClassifier)
+
 Data Handling: Pandas, NumPy, joblib
+
 Image Processing: PIL (Python Imaging Library)
+
 AI Integration: Google Generative AI (Gemini)
+
 Frontend: HTML, CSS
 
 ## 📁 Project Structure
