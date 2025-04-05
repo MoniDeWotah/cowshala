@@ -46,13 +46,12 @@ cowshala/
 ### Setup & Installation
 
 Clone the Repository:
-
 ```
 git clone https://github.com/MoniDeWotah/cowshala.git
 cd cowshala
 ```
-Create a Virtual Environment (Optional but Recommended):
 
+Create a Virtual Environment (Optional but Recommended):
 ```
 python -m venv venv
 source venv/bin/activate  # For Linux/Mac
@@ -62,13 +61,14 @@ venv\Scripts\activate     # For Windows
 Install Dependencies:
 ```
 pip install -r requirements.txt
-Configure Environment Variables:
 ```
+
 Set your Gemini API key as an environment variable:
 ```
 export GEMINI_API_KEY="your-api-key-here"  # For Linux/Mac
 set GEMINI_API_KEY=your-api-key-here       # For Windows CMD
 ```
+
 Run the Application:
 ```
 python app.py
