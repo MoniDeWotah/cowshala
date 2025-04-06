@@ -1,5 +1,6 @@
 Flask
 numpy
+gunicorn
 pandas
 joblib
 Werkzeug
