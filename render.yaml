@@ -4,7 +4,6 @@ services:
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    pythonVersion: 3.9
     envVars:
       - key: GOOGLE_API_KEY
         value: "AIzaSyA7mhqa0nWST2zY0m-fwhoPt8EXwIk2bqE"
