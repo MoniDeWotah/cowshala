@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import numpy as np
 import pandas as pd
 import joblib
@@ -8,59 +8,48 @@ from PIL import Image
 import torch
 from torchvision import transforms, models
 from torch import nn
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 import google.generativeai as genai
-import glob
 
 app = Flask(__name__, static_folder='static')
 
-# --- Configuration ---
+# Configuration
 BREED_MODEL_PATH = "models/cattle_breed_classifier_full_model.pth"
 BREED_LABELS_PATH = "models/breed_labels.txt"
-DISEASE_MODEL_PATH = "models/disease_model.pkl"
-DEVICE = torch.device("cpu")  # Force CPU for Render
+DISEASE_DATA_PATH = "data/Cow_Disease_Train.xlsx"
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CURRENT_LOCATION = "Indore, Madhya Pradesh, India"
 
-# --- Load breed labels ---
+# Load breed labels
 breed_labels = []
+num_classes = 0
 try:
     with open(BREED_LABELS_PATH, "r") as f:
         breed_labels = [line.strip() for line in f]
+    num_classes = len(breed_labels)
+except FileNotFoundError:
+    print(f"Error: Breed labels file not found at {BREED_LABELS_PATH}")
 except Exception as e:
-    print(f"Failed to load breed labels: {e}")
+    print(f"Error loading breed labels from {BREED_LABELS_PATH}: {e}")
 
-# --- Load breed model (CPU Only) ---
+# Load breed model
 breed_model = None
-if breed_labels:
+if num_classes > 0:
     try:
-        num_classes = len(breed_labels)
         breed_model = models.resnet18(weights=None)
         breed_model.fc = nn.Linear(breed_model.fc.in_features, num_classes)
         breed_model.load_state_dict(torch.load(BREED_MODEL_PATH, map_location=DEVICE))
         breed_model.to(DEVICE)
         breed_model.eval()
-        print("Breed model loaded on CPU.")
+        print("Breed model loaded successfully.")
+    except FileNotFoundError:
+        print(f"Error: Breed model file not found at {BREED_MODEL_PATH}")
     except Exception as e:
-        print(f"Failed to load breed model: {e}")
+        print(f"Error loading breed model from {BREED_MODEL_PATH}: {e}")
 
-# --- Load disease model ---
-disease_model = None
-try:
-    disease_model = joblib.load(DISEASE_MODEL_PATH)
-    print("Disease model loaded.")
-except Exception as e:
-    print(f"Failed to load disease model: {e}")
-
-# --- Gemini Setup ---
-GEMINI_API_KEY = "AIzaSyA7mhqa0nWST2zY0m-fwhoPt8EXwIk2bqE"
-gemini_model = None
-try:
-    if GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
-        gemini_model = genai.GenerativeModel("gemini-1.5-pro-latest")
-except Exception as e:
-    print(f"Failed to configure Gemini: {e}")
-
-# --- Image Transform ---
+# Image transform
 img_transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -68,7 +57,41 @@ img_transform = transforms.Compose([
                          std=[0.229, 0.224, 0.225])
 ])
 
-# --- Routes ---
+# Configure Gemini
+GEMINI_API_KEY = "AIzaSyA7mhqa0nWST2zY0m-fwhoPt8EXwIk2bqE"  # Replace with your key
+gemini_model = None
+if GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        gemini_model = genai.GenerativeModel("gemini-1.5-pro-latest")
+        print("Gemini API configured.")
+    except Exception as e:
+        print(f"Error configuring Gemini API: {e}")
+
+# Load and train disease model
+disease_model = None
+try:
+    df = pd.read_excel(DISEASE_DATA_PATH)
+    X = df.drop("Disease", axis=1)
+    y = df["Disease"]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    disease_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    disease_model.fit(X_train, y_train)
+
+    y_pred = disease_model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    print(f"Disease Model Accuracy: {acc:.2f}")
+
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(disease_model, "models/disease_model.pkl")
+except FileNotFoundError:
+    print(f"Error: Disease data file not found at {DISEASE_DATA_PATH}")
+except Exception as e:
+    print(f"Error loading or training disease model: {e}")
+
+# Routes
 @app.route("/")
 def home():
     return render_template("index.html", location=CURRENT_LOCATION)
@@ -79,53 +102,43 @@ def breed_page():
 
 @app.route("/predict_breed", methods=["POST"])
 def predict_breed():
-    if not breed_model or 'file' not in request.files:
-        return render_template("breed.html", error="Model not available or no file uploaded.", location=CURRENT_LOCATION)
+    if not breed_model:
+        return "Breed prediction model is not available."
 
+    if 'file' not in request.files:
+        return "No file uploaded"
     file = request.files['file']
     if file.filename == '':
-        return render_template("breed.html", error="No file selected.", location=CURRENT_LOCATION)
+        return "No file selected"
 
     try:
-        # --- Clean old uploads ---
-        for f in glob.glob("static/uploads/*"):
-            os.remove(f)
-
-        # --- Save new upload ---
         filename = secure_filename(file.filename)
         filepath = os.path.join("static/uploads", filename)
         os.makedirs("static/uploads", exist_ok=True)
         file.save(filepath)
 
-        # --- Process image ---
         img = Image.open(filepath).convert("RGB")
         img_tensor = img_transform(img).unsqueeze(0).to(DEVICE)
 
-        # --- Predict ---
         with torch.no_grad():
-            output = breed_model(img_tensor)
-            predicted_idx = torch.argmax(output, 1).item()
-            predicted_label = breed_labels[predicted_idx]
+            outputs = breed_model(img_tensor)
+            _, predicted_idx = torch.max(outputs, 1)
+            predicted_label = breed_labels[predicted_idx.item()]
 
-        # --- Cleanup tensors ---
-        del img_tensor, output
-        torch.cuda.empty_cache()  # Safe even on CPU
-
-        # --- Gemini Insights ---
         insights = None
         if gemini_model:
+            gemini_prompt = f"Give insights about cattle breed '{predicted_label}' including its characteristics and usefulness in the region of {CURRENT_LOCATION}."
             try:
-                prompt = f"Give insights about cattle breed '{predicted_label}' and its usefulness in {CURRENT_LOCATION}."
-                response = gemini_model.generate_content(prompt)
-                insights = response.text
-            except:
-                insights = "Gemini insights could not be retrieved."
+                gemini_response = gemini_model.generate_content(gemini_prompt)
+                insights = gemini_response.text
+            except Exception as e:
+                print(f"Error getting Gemini insights: {e}")
 
         return render_template("breed.html", prediction=predicted_label, image_path=filepath, insights=insights, location=CURRENT_LOCATION)
 
     except Exception as e:
-        print(f"Prediction error: {e}")
-        return render_template("breed.html", error="Breed prediction failed.", location=CURRENT_LOCATION)
+        print(f"Error during breed prediction: {e}")
+        return render_template("breed.html", error="An error occurred during breed prediction. Please try again.", location=CURRENT_LOCATION)
 
 @app.route("/disease")
 def disease_page():
@@ -138,7 +151,7 @@ def disease_prediction_page():
 @app.route("/predict_disease", methods=["POST"])
 def predict_disease():
     if not disease_model:
-        return render_template("disease_prediction.html", prediction="Model not available.", location=CURRENT_LOCATION)
+        return render_template("disease_prediction.html", prediction="Disease prediction model not available.", location=CURRENT_LOCATION)
 
     try:
         symptoms = [
@@ -148,19 +161,18 @@ def predict_disease():
         ]
         features = [float(request.form.get(symptom, 0)) for symptom in symptoms]
         input_data = np.array(features).reshape(1, -1)
-        prediction = disease_model.predict(input_data)[0]
+        prediction = disease_model.predict(input_data)
 
         advice = None
         if gemini_model:
+            gemini_prompt = f"Give treatment and care advice for cattle disease '{prediction[0]}' considering the common practices and availability of resources in {CURRENT_LOCATION}."
             try:
-                prompt = f"Give treatment and care advice for cattle disease '{prediction}' in {CURRENT_LOCATION}."
-                response = gemini_model.generate_content(prompt)
-                advice = response.text
-            except:
-                advice = "Gemini advice could not be retrieved."
+                gemini_response = gemini_model.generate_content(gemini_prompt)
+                advice = gemini_response.text
+            except Exception as e:
+                print(f"Error getting Gemini advice: {e}")
 
-        return render_template("disease_prediction.html", prediction=prediction, advice=advice, location=CURRENT_LOCATION)
+        return render_template("disease_prediction.html", prediction=prediction[0], advice=advice, location=CURRENT_LOCATION)
     except Exception as e:
-        print(f"Disease prediction error: {e}")
-        return render_template("disease_prediction.html", prediction="Prediction error.", location=CURRENT_LOCATION)
-
+        print(f"Error during disease prediction: {e}")
+        return render_template("disease_prediction.html", prediction=f"Error: {str(e)}", location=CURRENT_LOCATION)
