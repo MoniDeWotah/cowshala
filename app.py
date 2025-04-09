@@ -9,7 +9,7 @@ import torch
 from torchvision import transforms, models
 from torch import nn
 import google.generativeai as genai
-from sklearn.preprocessing import LabelEncoder
+import glob
 
 app = Flask(__name__, static_folder='static')
 
@@ -17,7 +17,6 @@ app = Flask(__name__, static_folder='static')
 BREED_MODEL_PATH = "models/cattle_breed_classifier_full_model.pth"
 BREED_LABELS_PATH = "models/breed_labels.txt"
 DISEASE_MODEL_PATH = "models/disease_model.pkl"
-DISEASE_LABEL_ENCODER_PATH = "models/disease_label_encoder.pkl"
 DEVICE = torch.device("cpu")  # Force CPU for Render
 CURRENT_LOCATION = "Indore, Madhya Pradesh, India"
 
@@ -51,16 +50,8 @@ try:
 except Exception as e:
     print(f"Failed to load disease model: {e}")
 
-# --- Load disease label encoder ---
-disease_label_encoder = None
-try:
-    disease_label_encoder = joblib.load(DISEASE_LABEL_ENCODER_PATH)
-    print("Disease label encoder loaded.")
-except Exception as e:
-    print(f"Failed to load label encoder: {e}")
-
 # --- Gemini Setup ---
-GEMINI_API_KEY = "AIzaSyA7mhqa0nWST2zY0m-fwhoPt8EXwIk2bqE"  # Replace if needed
+GEMINI_API_KEY = "AIzaSyA7mhqa0nWST2zY0m-fwhoPt8EXwIk2bqE"
 gemini_model = None
 try:
     if GEMINI_API_KEY:
@@ -96,19 +87,31 @@ def predict_breed():
         return render_template("breed.html", error="No file selected.", location=CURRENT_LOCATION)
 
     try:
+        # --- Clean old uploads ---
+        for f in glob.glob("static/uploads/*"):
+            os.remove(f)
+
+        # --- Save new upload ---
         filename = secure_filename(file.filename)
         filepath = os.path.join("static/uploads", filename)
         os.makedirs("static/uploads", exist_ok=True)
         file.save(filepath)
 
+        # --- Process image ---
         img = Image.open(filepath).convert("RGB")
         img_tensor = img_transform(img).unsqueeze(0).to(DEVICE)
 
+        # --- Predict ---
         with torch.no_grad():
             output = breed_model(img_tensor)
             predicted_idx = torch.argmax(output, 1).item()
             predicted_label = breed_labels[predicted_idx]
 
+        # --- Cleanup tensors ---
+        del img_tensor, output
+        torch.cuda.empty_cache()  # Safe even on CPU
+
+        # --- Gemini Insights ---
         insights = None
         if gemini_model:
             try:
@@ -119,6 +122,7 @@ def predict_breed():
                 insights = "Gemini insights could not be retrieved."
 
         return render_template("breed.html", prediction=predicted_label, image_path=filepath, insights=insights, location=CURRENT_LOCATION)
+
     except Exception as e:
         print(f"Prediction error: {e}")
         return render_template("breed.html", error="Breed prediction failed.", location=CURRENT_LOCATION)
@@ -133,7 +137,7 @@ def disease_prediction_page():
 
 @app.route("/predict_disease", methods=["POST"])
 def predict_disease():
-    if not disease_model or not disease_label_encoder:
+    if not disease_model:
         return render_template("disease_prediction.html", prediction="Model not available.", location=CURRENT_LOCATION)
 
     try:
@@ -142,45 +146,21 @@ def predict_disease():
             'Skin_Nodules', 'Blisters_Mouth', 'Nasal_Discharge', 'Infertility', 'Blood_Oozing',
             'Muscle_Swelling', 'Loss_of_Appetite', 'Abortion', 'Sudden_Death'
         ]
-
-        features = []
-        for symptom in symptoms:
-            val = request.form.get(symptom)
-            try:
-                features.append(float(val))
-            except:
-                features.append(0.0)
-
+        features = [float(request.form.get(symptom, 0)) for symptom in symptoms]
         input_data = np.array(features).reshape(1, -1)
-        print("Symptom values:", features)
-
-        predicted_class_index = disease_model.predict(input_data)[0]
-        predicted_disease = disease_label_encoder.inverse_transform([predicted_class_index])[0]
-
-        if hasattr(disease_model, "predict_proba"):
-            proba = disease_model.predict_proba(input_data)[0]
-            confidence = f" (Confidence: {round(max(proba)*100, 2)}%)"
-        else:
-            confidence = ""
+        prediction = disease_model.predict(input_data)[0]
 
         advice = None
         if gemini_model:
             try:
-                prompt = f"Give treatment and care advice for cattle disease '{predicted_disease}' in {CURRENT_LOCATION}."
+                prompt = f"Give treatment and care advice for cattle disease '{prediction}' in {CURRENT_LOCATION}."
                 response = gemini_model.generate_content(prompt)
                 advice = response.text
             except:
                 advice = "Gemini advice could not be retrieved."
 
-        return render_template(
-            "disease_prediction.html",
-            prediction=predicted_disease + confidence,
-            advice=advice,
-            location=CURRENT_LOCATION
-        )
+        return render_template("disease_prediction.html", prediction=prediction, advice=advice, location=CURRENT_LOCATION)
     except Exception as e:
         print(f"Disease prediction error: {e}")
         return render_template("disease_prediction.html", prediction="Prediction error.", location=CURRENT_LOCATION)
 
-if __name__ == "__main__":
-    app.run(debug=True)
